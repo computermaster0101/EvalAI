@@ -31,6 +31,7 @@ class WebSrvr:
         self.gemini_api_key =os.environ.get ('GEMINI_API_KEY')
         self.aws_access_key_id = os.environ.get('AWS_ACCESS_KEY_ID')
         self.aws_secret_access_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
+        self.aws_session_token = os.environ.get('AWS_SESSION_TOKEN')
         self.aws_execution_env = os.environ.get('AWS_EXECUTION_ENV')  # AWS ECS sets this variable
         
         Session(self.app)
@@ -44,7 +45,7 @@ class WebSrvr:
         # Set AWS credentials before creating Claude instance
         self.set_aws_credentials()
         self.openai = MyOpenAI(self.openai_api_key)
-        self.claude = Claude(self.aws_access_key_id, self.aws_secret_access_key)
+        self.claude = Claude(self.aws_access_key_id, self.aws_secret_access_key, self.aws_session_token)
         self.gemini = MyGemini(self.gemini_api_key)
 
         # Serve the favicon.ico file

@@ -5,12 +5,13 @@ import boto3
 debug = False
 
 class Claude:
-    def __init__(self, aws_access_key_id, aws_secret_access_key):
+    def __init__(self, aws_access_key_id=None, aws_secret_access_key=None, session_token=None):
         self.region = 'us-east-1'
         self.session = boto3.Session(
             region_name=self.region,
             aws_access_key_id=aws_access_key_id,
-            aws_secret_access_key=aws_secret_access_key
+            aws_secret_access_key=aws_secret_access_key,
+            aws_session_token=session_token
         )
         self.bedrock = self.session.client('bedrock')
         self.bedrock_runtime = self.session.client('bedrock-runtime')
