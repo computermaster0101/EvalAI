@@ -48,20 +48,25 @@ class WebSrvr:
         self.claude = Claude(self.aws_access_key_id, self.aws_secret_access_key, self.aws_session_token)
         self.gemini = MyGemini(self.gemini_api_key)
 
-        # Serve the favicon.ico file
+        @self.app.route('/')
+        def index():
+            return send_from_directory('static', 'index.html')
+
+        @self.app.route('/index.js')
+        def js():
+            return send_from_directory('static', 'index.js', mimetype='application/javascript')
+
+        @self.app.route('/index.css')
+        def css():
+            return send_from_directory('static', 'index.css')
+
         @self.app.route('/favicon.ico')
         def favicon():
-            return send_from_directory(os.path.join(self.app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
-
-
-        @self.app.route('/', defaults={'path': 'index.html'})
-        @self.app.route('/<path:path>')
-        def render_html(path):
-            return render_template(path)
+            return send_from_directory('static', 'favicon.ico')
         
-        @self.app.route('/images/<path:filename>')
-        def serve_images(filename):
-            return send_from_directory('images', filename)
+        @self.app.route('/system_prompt.txt')
+        def prompt():
+            return send_from_directory('static', 'system_prompt.txt')
         
         @self.socketio.on('connect')
         def handle_connect():
