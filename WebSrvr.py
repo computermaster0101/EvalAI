@@ -54,7 +54,7 @@ class WebSrvr:
 
         @self.app.route('/index.js')
         def js():
-            return send_from_directory('static', 'index.js', mimetype='application/javascript')
+            return send_from_directory('static', 'index.js')
 
         @self.app.route('/index.css')
         def css():
