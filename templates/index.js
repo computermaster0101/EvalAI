@@ -67,7 +67,7 @@ function resetChats() {
     chatClaude.innerHTML = "<strong>Claude:</strong> Hello! "; // Clear chat messages
     chatGemini.innerHTML = "<strong>Gemini:</strong> Hello! "; // Clear chat messages
     chatOpenai.innerHTML = "<strong>OpenAI:</strong> Hello! "; // Clear chat messages
-    socket.emit('reset_chat')
+    socket.emit('reset')
 }
 
 // Listen for the thinking and reply responses from the backend

@@ -9,23 +9,30 @@ from GeminiHandler import MyGemini
 import threading
 import os
 from dotenv import load_dotenv
+import secrets
+import string
 
-# Load environment variables from .env file
-load_dotenv()
 
-# Retrieve environment variables
-openai_api_key = os.environ.get('OPENAI_API_KEY')
-aws_access_key_id = os.environ.get('AWS_ACCESS_KEY_ID')
-aws_secret_access_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
-gemini_api_key = os.environ.get('GEMINI_API_KEY')
+
 
 
 
 class WebSrvr:
     def __init__(self, host='127.0.0.1', port=5000):
         self.app = Flask(__name__)
-        self.app.config['SECRET_KEY'] = 'aswskjashdoi68aoiuhli76qijbnli7z6a'  # Change this to a random secret key
+        self.app.config['SECRET_KEY'] = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(24))
         self.app.config['SESSION_TYPE'] = 'filesystem'  # You can change this to other session types as per your requirement
+        
+        # Load environment variables from .env file
+        load_dotenv()
+
+        # Retrieve environment variables
+        self.openai_api_key = os.environ.get('OPENAI_API_KEY')
+        self.gemini_api_key =os.environ.get ('GEMINI_API_KEY')
+        self.aws_access_key_id = os.environ.get('AWS_ACCESS_KEY_ID')
+        self.aws_secret_access_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
+        self.aws_execution_env = os.environ.get('AWS_EXECUTION_ENV')  # AWS ECS sets this variable
+        
         Session(self.app)
 
         self.host = host
@@ -33,10 +40,17 @@ class WebSrvr:
         self.socketio = SocketIO(self.app)
 
         self.conversations = ConversationHandler()
-        self.openai = MyOpenAI(openai_api_key)
-        self.claude = Claude(aws_access_key_id, aws_secret_access_key)
-        self.gemini = MyGemini(gemini_api_key)
+        
+        # Set AWS credentials before creating Claude instance
+        self.set_aws_credentials()
+        self.openai = MyOpenAI(self.openai_api_key)
+        self.claude = Claude(self.aws_access_key_id, self.aws_secret_access_key)
+        self.gemini = MyGemini(self.gemini_api_key)
 
+        # Serve the favicon.ico file
+        @self.app.route('/favicon.ico')
+        def favicon():
+            return send_from_directory(os.path.join(self.app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 
         @self.app.route('/', defaults={'path': 'index.html'})
@@ -51,7 +65,6 @@ class WebSrvr:
         @self.socketio.on('connect')
         def handle_connect():
             # Associate each client with a unique identifier (e.g., session ID)
-            # You may need to modify this based on how you manage sessions in your application
             client_id = request.sid
             session['client_id'] = client_id
             print(f"Client connected: {client_id}")
@@ -61,15 +74,25 @@ class WebSrvr:
             client_id = session.get('client_id')
             if client_id:
                 print(f"Client disconnected: {client_id}")
-            
+
+        @self.socketio.on('reset')
+        def reset():
+            client_id = session.get('client_id')
+            self.conversations.reset_conversation(f'{client_id}-claude')
+            self.conversations.reset_conversation(f'{client_id}-gemini')
+            self.conversations.reset_conversation(f'{client_id}-openai')
+            print("Reset chats")
+                
         @self.socketio.on('request')
         def getResponse(request):
             client_id = session.get('client_id')
             print("Received chat query:", request)
-            print("Received chat query:", request['message'])  # Corrected line
-            if request['message'].lower() in ["", "hi", "hello", "hey"]:  # Corrected line
-                text = "Hello!"
-                self.socketio.emit('reply', {'response': text}, room=client_id)
+            print("Received chat query:", request['message'])  
+            if request['message'].lower() in ["", "hi", "hello", "hey"]: 
+                echo_start_time = time.time()  
+                echo_end_time = time.time()  
+                echo_time_taken = echo_start_time - echo_end_time
+                self.socketio.emit('reply', {'llm': 'Echo', 'response': f"{echo_time_taken}s<br>{request['message']}"}, room=client_id)
             else:
                 self.socketio.emit('thinking', {'response': "One moment I'm thinking..."}, room=client_id)
 
@@ -121,12 +144,13 @@ class WebSrvr:
                 for thread in threads:
                     thread.join()
                 
-
-        @self.socketio.on('chat_reset')
-        def reset(query):
-            client_id = session.get('client_id')
-            print("Received chat reset")
      
+    def set_aws_credentials(self):
+        # If running locally, set AWS credentials
+        if self.aws_execution_env:  # Not running in AWS ECS
+            # You might want to perform additional validation here
+            self.aws_access_key_id = None
+            self.aws_secret_access_key = None
     
     def run(self):
         print(f"Running Flask app on {self.host}:{self.port}")

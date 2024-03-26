@@ -36,3 +36,12 @@ class ConversationHandler:
         print("ConversationHandler.trunctate_history") if debug else None
         if len(self.conversations[conversation_id]) > self.max_history:
             self.conversations[conversation_id] = self.conversations[conversation_id][-self.max_history:]
+
+    def reset_conversation(self, conversation_id) -> None:
+        print("ConversationHandler.reset_conversation") if debug else None
+        # In this application we can just reset the conversation object
+        # self.conversations[conversation_id] = []
+        self.conversation = []
+
+
+
