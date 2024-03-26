@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chat with EvalAI</title>
+  <base target="text">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="description" content="Chat with EvalAI, an AI for evaluating AI responses">
+  <meta name="keywords" content="Chat, EvalAI, AI">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='index.css') }}">
+</head>
+<body>
+  <div class="header">
+    <h1>Chat with EvalAI</h1>
+  </div>
+
+  <!-- Chat Containers -->
+  <div class="chat-container">
+    <div class="chat-header">Anthropic's Claude</div>
+    <div class="chat-box" id="chat-messages1">
+      <div>
+        <strong>Claude:</strong> Hello!
+      </div>
+    </div>
+  </div>
+
+  <div class="chat-container">
+    <div class="chat-header">Google's Gemini</div>
+    <div class="chat-box" id="chat-messages2">
+      <div>
+        <strong>Gemini:</strong> Hello!
+      </div>
+    </div>
+  </div>
+
+  <div class="chat-container">
+    <div class="chat-header">OpenAI Playground</div>
+    <div class="chat-box" id="chat-messages3">
+      <div>
+        <strong>OpenAI:</strong> Hello!
+      </div>
+    </div>
+  </div>
+
+  <!-- Single Chat Input -->
+  <div class="input-container">
+    <input type="text" class="message-input" id="message-input" placeholder="Type your message here">
+    <div class="button-container">
+      <button type="submit" class="send-btn" id="send-btn">Send</button>
+      <button type="button" class="reset-btn" id="reset-btn">Reset</button>
+      <button type="button" class="system-prompt-btn" onclick="openPrompt()">System Prompt</button>  
+    </div>
+  </div>
+
+
+  <!-- Popup for System Prompt -->
+  <div class="overlay" id="overlay"></div>
+  <div class="popup" id="popup">
+    <div class="input-row">
+      <div class="input-column">
+        <label for="temp">Temp:</label>
+        <input type="number" id="temp" name="temp" min="0.1" max="1.0" step="0.1" value="1.0">
+      </div>
+      <div class="input-column">
+        <label for="top_p">Top P:</label>
+        <input type="number" id="top_p" name="top_p" min="0.1" max="1.0" step="0.1" value="0.1">
+      </div>
+      <div class="input-column">
+        <label for="max_token">Max Tokens:</label>
+        <input type="number" id="max_token" name="max_token" min="250" max="4096" value="250">
+      </div>
+    </div>
+    <label for="paragraphInput">System Prompt:</label><br>
+    <textarea id="paragraphInput" rows="4" cols="50"></textarea><br><br>
+    <button onclick="hidePopup()">OK</button>
+  </div>
+
+
+
+  <!-- JavaScript for handling chat functionality -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.js" integrity="sha512-luMnTJZ7oEchNDZAtQhgjomP1eZefnl82ruTH/3Oj/Yu5qYtwL7+dVRccACS/Snp1lFXq188XFipHKYE75IaQQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="index.js"></script>
+  <script>
+    $(document).ready(function(){
+      // Fetching default text from system_prompt.txt
+      $.get("system_prompt.txt", function(data) {
+        $("#paragraphInput").val(data);
+      });
+    });
+  </script>
+</body>
+</html>
