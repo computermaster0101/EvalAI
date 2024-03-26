@@ -5,3 +5,4 @@ cachelib
 boto3
 openai
 google-generativeai
+python-dotenv

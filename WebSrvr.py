@@ -7,12 +7,18 @@ from ConversationHandler import ConversationHandler
 from BedrockHandler import Claude
 from GeminiHandler import MyGemini
 import threading
+import os
+from dotenv import load_dotenv
 
+# Load environment variables from .env file
+load_dotenv()
 
-openai_api_key = ""
-aws_access_key_id=""
-aws_secret_access_key=""
-gemini_api_key = ""
+# Retrieve environment variables
+openai_api_key = os.environ.get('OPENAI_API_KEY')
+aws_access_key_id = os.environ.get('AWS_ACCESS_KEY_ID')
+aws_secret_access_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
+gemini_api_key = os.environ.get('GEMINI_API_KEY')
+
 
 
 class WebSrvr:
@@ -124,7 +130,7 @@ class WebSrvr:
     
     def run(self):
         print(f"Running Flask app on {self.host}:{self.port}")
-        self.socketio.run(self.app, host=self.host, port=self.port)
+        self.socketio.run(self.app, host=self.host, port=self.port, allow_unsafe_werkzeug=True)
 
 if __name__ == "__main__":
     HOST = "0.0.0.0"
