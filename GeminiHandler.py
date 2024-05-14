@@ -8,7 +8,10 @@ class MyGemini:
         self.chat = self.model.start_chat(history=[])
 
     def get_response(self, question):
-        response = self.chat.send_message(question, stream=False)
+        response = self.chat.send_message(
+            question, 
+            stream=False
+        )
         for candidate in response._result.candidates:
             generated_text = candidate.content.parts[0].text
             return generated_text    

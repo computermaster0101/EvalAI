@@ -119,7 +119,7 @@ class WebSrvr:
                     gemini_conversation_id = self.conversations.create_conversation(f'{client_id}-gemini')
                     self.conversations.add_message(gemini_conversation_id, request['message'])
                     gemini_coversation = self.conversations.get_conversation(gemini_conversation_id)
-                    gemini_response = self.gemini.get_response(request['message'])
+                    gemini_response = self.gemini.get_response(f"{request['system_prompt']}{request['message']}")
                     self.conversations.add_message(gemini_conversation_id, gemini_response)
                     gemini_end_time = time.time()
                     gemini_time_taken = gemini_end_time - gemini_start_time

@@ -41,7 +41,7 @@ class ConversationHandler:
         print("ConversationHandler.reset_conversation") if debug else None
         # In this application we can just reset the conversation object
         # self.conversations[conversation_id] = []
-        self.conversation = []
+        self.conversations = {}
 
 
 
